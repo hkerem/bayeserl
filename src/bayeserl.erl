@@ -80,5 +80,5 @@ forget_everything() -> bayeserl_server:forget_everything().
 
 register_store(Store) -> bayeserl_server:register_store(Store).
 
-register_store(Normalizer) -> bayeserl_server:register_normalizer(Normalizer).
+register_normalizer(Normalizer) -> bayeserl_server:register_normalizer(Normalizer).
 
