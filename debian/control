@@ -1,0 +1,11 @@
+Source: bayeserl
+Section: net
+Priority: optional
+Maintainer: H. Kerem Cevahir <kerem@medratech.com>
+Build-Depends: debhelper (>= 5), cdbs, autotools-dev, libtool, erlang-dev, erlang-nox
+Standards-Version: 3.8.0
+
+Package: bayeserl
+Architecture: any
+Depends: ${erlang-nox:Depends}
+Description: An Bayessian Classifier Engine Implemetation in Erlang
