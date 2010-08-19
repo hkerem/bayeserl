@@ -39,6 +39,7 @@
 	score/1,
 	forget_everything/0,
 	register_store/1,
+	register_normalizer/1,
 	stop/0]).
 
 %% gen_server callbacks
@@ -52,6 +53,7 @@
 
 -record(state, {
 		store,
+		normalizer,
 		regexes
 	}).
 
@@ -64,6 +66,9 @@ score(Subject) -> async_call({s, Subject}).
 forget_everything() -> async_call(fe).
 
 register_store(Store) -> gen_server:call(?MODULE, {register_store, Store}).
+
+register_normalizer(Normalizer) -> 
+	gen_server:call(?MODULE, {register_normalizer, Normalizer}).
 
 %%%%%%%%%%%%% MyDLP Thrift RPC API
 
@@ -110,6 +115,9 @@ handle_call({register_store, NewStore}, _From, #state{store=ExStore} = State) ->
 	ExStore:stop(),
 	NewStore:start(),
 	{reply, ok, State#state{store=NewStore}, 15000};
+
+handle_call({register_normalizer, Normalizer}, _From, State) ->
+	{reply, ok, State#state{normalizer=Normalizer}, 15000};
 
 handle_call(stop, _From, State) ->
 	{stop, normalStop, State};
@@ -177,8 +185,10 @@ get_word_tree(Subject, #state{regexes={RE1}} = State) ->
 
 	_WordTree = build_word_tree(WordList2, gb_trees:empty()).
 
-normalize_word(Word, _State) ->
-	string:to_lower(Word).
+normalize_word(Word, #state{normalizer=undefined}) ->
+	string:to_lower(Word);
+normalize_word(Word, #state{normalizer=Normalizer}) ->
+	Normalizer:normalize(Word).
 
 push_word_tree_to_store(Tree, Store, Type) ->
 	push_word_tree_to_store1(gb_trees:iterator(Tree), Store, Type).

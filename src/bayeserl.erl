@@ -30,6 +30,7 @@
         score/1,
         forget_everything/0,
         register_store/1,
+        register_normalizer/1,
 	shutdown/0,
 	stop/1]).
 
@@ -78,4 +79,6 @@ score(S) -> bayeserl_server:score(S).
 forget_everything() -> bayeserl_server:forget_everything().
 
 register_store(Store) -> bayeserl_server:register_store(Store).
+
+register_store(Normalizer) -> bayeserl_server:register_normalizer(Normalizer).
 
