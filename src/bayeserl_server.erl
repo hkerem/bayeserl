@@ -38,6 +38,7 @@
 	train_negative/1,
 	score/1,
 	forget_everything/0,
+	register_store/1,
 	stop/0]).
 
 %% gen_server callbacks
@@ -61,6 +62,8 @@ train_negative(Subject) -> async_call({tn, Subject}).
 score(Subject) -> async_call({s, Subject}).
 
 forget_everything() -> async_call(fe).
+
+register_store(Store) -> gen_server:call(?MODULE, {register_store, Store}).
 
 %%%%%%%%%%%%% MyDLP Thrift RPC API
 
@@ -102,6 +105,11 @@ handle_call({async_call, Call}, From, State) ->
 		Worker ! {async_reply, Result, From}
 	end),
 	{noreply, State, 15000};
+
+handle_call({register_store, NewStore}, From, #state{store=ExStore} = State) ->
+	ExStore:stop(),
+	NewStore:start(),
+	{reply, ok, State#{store=NewStore}, 15000};
 
 handle_call(stop, _From, State) ->
 	{stop, normalStop, State};

@@ -29,6 +29,7 @@
         train_negative/1,
         score/1,
         forget_everything/0,
+        register_store/1,
 	shutdown/0,
 	stop/1]).
 
@@ -75,4 +76,6 @@ train_negative(S) -> bayeserl_server:train_negative(S).
 score(S) -> bayeserl_server:score(S).
 
 forget_everything() -> bayeserl_server:forget_everything().
+
+register_store(Store) -> bayeserl_server:register_store(Store).
 
