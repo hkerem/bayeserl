@@ -106,10 +106,10 @@ handle_call({async_call, Call}, From, State) ->
 	end),
 	{noreply, State, 15000};
 
-handle_call({register_store, NewStore}, From, #state{store=ExStore} = State) ->
+handle_call({register_store, NewStore}, _From, #state{store=ExStore} = State) ->
 	ExStore:stop(),
 	NewStore:start(),
-	{reply, ok, State#{store=NewStore}, 15000};
+	{reply, ok, State#state{store=NewStore}, 15000};
 
 handle_call(stop, _From, State) ->
 	{stop, normalStop, State};

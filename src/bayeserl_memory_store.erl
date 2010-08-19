@@ -130,9 +130,6 @@ handle_call({g_n_wc, W}, _From, #state{negative_word_map=Tree} = State) ->
 		false -> 0 end,
 	{reply, Reply, State, 5000};
 
-handle_call(stop, _From, State) ->
-	{stop, normalStop, State};
-
 handle_call(_Msg, _From, State) ->
 	{noreply, State}.
 
@@ -150,11 +147,14 @@ start_link() ->
 	end.
 
 stop() ->
-	gen_server:call(?MODULE, stop).
+	gen_server:cast(?MODULE, stop).
 
 init([]) ->
 	{ok, #state{positive_word_map=gb_trees:empty(), 
 		negative_word_map=gb_trees:empty()}}.
+
+handle_cast(stop, State) ->
+	{stop, normal, State};
 
 handle_cast(_Msg, State) ->
 	{noreply, State}.
