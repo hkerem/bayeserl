@@ -109,7 +109,7 @@ handle_call({async_call, Call}, From, State) ->
 		Result = handle_async_call(Call, State),
 		Worker ! {async_reply, Result, From}
 	end),
-	{noreply, State, 15000};
+	{noreply, State, 60000};
 
 handle_call({register_store, NewStore}, _From, #state{store=ExStore} = State) ->
 	ExStore:stop(),
@@ -159,7 +159,7 @@ terminate(_Reason, #state{store=Store}) ->
 code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
-async_call(Call) -> gen_server:call(?MODULE, {async_call, Call}).
+async_call(Call) -> gen_server:call(?MODULE, {async_call, Call}, 60000).
 
 rec(Regex) -> {ok, Ret} = re:compile(Regex, [unicode]), Ret.
 
