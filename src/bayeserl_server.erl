@@ -84,20 +84,27 @@ handle_async_call({tn, Subject}, #state{store=Store} = State) ->
 
 handle_async_call({s, Subject}, #state{store=Store} = State) ->
 	WT = get_word_tree(Subject, State),
+	WTLength = gb_trees:size(WT),
 
 	RatingList = word_tree_to_rating_list(WT, Store),
 	RLLength = length(RatingList),
-	FinalList = case RLLength > 20 of
-		true -> SL = lists:sort(RatingList),
-			L1 = lists:sublist(SL, 10),
-			L2 = lists:sublist(SL, RLLength - 9, 10),
-			lists:append(L1, L2);
-		false -> RatingList end,
-	
-	P = lists:foldl(fun(X, Prod) -> X * Prod end, 1, FinalList),
-	OMP = lists:foldl(fun(X, Prod) -> (1.0 - X) * Prod end, 1, FinalList),
+	%FinalList = case RLLength > 20 of
+	%	true -> SL = lists:sort(RatingList),
+	%		L1 = lists:sublist(SL, 10),
+	%		L2 = lists:sublist(SL, RLLength - 9, 10),
+	%		lists:append(L1, L2);
+	%	false -> RatingList end,
+	case RLLength > 20 andalso WTLength > 10 andalso RLLength/WTLength > 0.15 of
+		true ->
+			SL = lists:sort(fun(A,B) -> 
+				( ( erlang:abs(A - 0.5) ) =< ( erlang:abs(B - 0.5) ) )
+				end, RatingList),
+			FinalList = lists:sublist(SL, RLLength - 19, 20),
 
-	P / (P + OMP);
+			P = lists:foldl(fun(X, Prod) -> X * Prod end, 1, FinalList),
+			OMP = lists:foldl(fun(X, Prod) -> (1.0 - X) * Prod end, 1, FinalList),
+			P / (P + OMP);
+		false -> 0.5 end;
 
 handle_async_call(fe, #state{store=Store}) -> Store:zero(), ok;
 
@@ -212,18 +219,25 @@ rate_word(Store, WordHash) ->
 	PWC = Store:g_p_wc(WordHash),
 	NWC = Store:g_n_wc(WordHash),
 
-	if 	( PWC > 0 ) and ( NWC == 0 ) -> 0.99;
-		( PWC == 0 ) and ( NWC > 0 ) -> 0.01;
+	Rating = if ( PWC > 0 ) and ( NWC == 0 ) -> 1.00;
+		( PWC == 0 ) and ( NWC > 0 ) -> 0.0;
 		%( PWC == 0 ) and ( NWC == 0 ) -> 0.4;
 		( PWC == 0 ) and ( NWC == 0 ) -> drop;
 		( TPC > 0 ) and ( TNC > 0 ) ->
 			PProb = PWC / TPC,
 			NProb = NWC / TNC,
-			Rating = PProb / (PProb + NProb),
-			if	Rating < 0.01 -> 0.01;
-				true -> Rating end;
+			PProb / (PProb + NProb);
+			%Rating = PProb / (PProb + NProb),
+			%if	Rating < 0.01 -> 0.01;
+			%	true -> Rating end;
 		%true -> 0.4 end.
-		true -> drop end.
+		true -> drop end,
+	% Correction on Pr(S|W)
+	% Define Strength = 3
+	TO = PWC + NWC,
+	case Rating of
+		drop -> drop;
+		R -> (3*0.5 + TO*R)/(3 + TO) end.
 
 word_tree_to_rating_list(WT, Store) -> 
 	word_tree_to_rating_list(gb_trees:iterator(WT), Store, []).
