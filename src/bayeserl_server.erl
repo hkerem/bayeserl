@@ -164,8 +164,7 @@ async_call(Call) -> gen_server:call(?MODULE, {async_call, Call}).
 rec(Regex) -> {ok, Ret} = re:compile(Regex, [unicode]), Ret.
 
 build_word_tree([], Tree) -> Tree;
-build_word_tree([Word|R], Tree) ->
-	W = erlang:phash2(Word),
+build_word_tree([W|R], Tree) ->
 	case gb_trees:is_defined(W, Tree) of
 		true ->
 			Count = gb_trees:get(W, Tree),
@@ -186,7 +185,8 @@ get_word_tree(Subject, #state{regexes={RE1}} = State) ->
 	_WordTree = build_word_tree(WordList2, gb_trees:empty()).
 
 normalize_word(Word, #state{normalizer=undefined}) ->
-	string:to_lower(Word);
+	LowerWord = string:to_lower(Word),
+	erlang:phash2(LowerWord);
 normalize_word(Word, #state{normalizer=Normalizer}) ->
 	Normalizer:normalize(Word).
 
