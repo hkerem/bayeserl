@@ -39,6 +39,7 @@ AC_ERLANG_SUBST_INSTALL_LIB_SUBDIR([bayeserl], [0.1])
 AC_CONFIG_FILES([
 		Makefile 
 		src/Makefile
+		src/overview.edoc
 		src/bayeserl.app
 		src/bayeserl.rel
 	])
