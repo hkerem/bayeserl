@@ -25,6 +25,7 @@
 -behaviour(application).
 
 -export([start/2,
+	start/0,
 	train_positive/1,
         train_negative/1,
         score/1,
@@ -51,6 +52,9 @@ start(_Type, StartArgs) ->
 	case bayeserl_sup:start_link(StartArgs) of
 		{ok, Pid} -> {ok, Pid};
 		Error -> Error end.
+
+start() ->
+	application:start(bayeserl).
 
 %%--------------------------------------------------------------------
 %% @doc Called to shudown the bayeserl application.
