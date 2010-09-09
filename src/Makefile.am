@@ -28,7 +28,8 @@ dist_hrl_DATA = \
 	bayeserl.hrl
 
 beam_DATA = \
-	$(dist_erl_DATA:.erl=.beam)
+	$(dist_erl_DATA:.erl=.beam) \
+	bayeserl.app
 
 boot_DATA = \
 	bayeserl.boot \
@@ -47,11 +48,11 @@ html_DATA = \
 	modules-frame.html \
 	packages-frame.html
 
-erldir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/src
-hrldir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/include
-beamdir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/ebin
-privdir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/priv
-htmldir = $(ERLANG_INSTALL_LIB_DIR_mydlp)/doc
+erldir = $(ERLANG_INSTALL_LIB_DIR_bayeserl)/src
+hrldir = $(ERLANG_INSTALL_LIB_DIR_bayeserl)/include
+beamdir = $(ERLANG_INSTALL_LIB_DIR_bayeserl)/ebin
+privdir = $(ERLANG_INSTALL_LIB_DIR_bayeserl)/priv
+htmldir = $(ERLANG_INSTALL_LIB_DIR_bayeserl)/doc
 bootdir = $(libdir)/erlang/bin
 ERLCFLAGS += -W
 
@@ -83,5 +84,5 @@ run: $(beam_DATA) $(boot_DATA)
 	@$(ERL) -sname console -boot bayeserl
 
 clean-local:
-	rm -rf $(beam_DATA) $(boot_DATA) $(html_DATA) mydlp.rel overview.edoc
+	rm -rf $(beam_DATA) $(boot_DATA) $(html_DATA) bayeserl.rel overview.edoc
 
