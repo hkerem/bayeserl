@@ -1,4 +1,4 @@
-%%
+%%%
 %%%    Copyright (C) 2010 Huseyin Kerem Cevahir <kerem@medra.com.tr>
 %%%
 %%%--------------------------------------------------------------------------
@@ -94,16 +94,20 @@ handle_async_call({s, Subject}, #state{store=Store} = State) ->
 	%		L2 = lists:sublist(SL, RLLength - 9, 10),
 	%		lists:append(L1, L2);
 	%	false -> RatingList end,
-	case RLLength > 20 andalso WTLength > 10 andalso RLLength/WTLength > 0.15 of
+	case RLLength > 3 andalso WTLength > 3 andalso RLLength/WTLength > 0.15 of
 		true ->
 			SL = lists:sort(fun(A,B) -> 
 				( ( erlang:abs(A - 0.5) ) =< ( erlang:abs(B - 0.5) ) )
 				end, RatingList),
 			FinalList = lists:sublist(SL, RLLength - 19, 20),
 
-			P = lists:foldl(fun(X, Prod) -> X * Prod end, 1, FinalList),
-			OMP = lists:foldl(fun(X, Prod) -> (1.0 - X) * Prod end, 1, FinalList),
-			P / (P + OMP);
+%			FinalList = RatingList,
+%			erlang:display(FinalList),
+%
+%			P = lists:foldl(fun(X, Prod) -> X * Prod end, 1, FinalList),
+%			OMP = lists:foldl(fun(X, Prod) -> (1.0 - X) * Prod end, 1, FinalList),
+%			P / (P + OMP);
+			lists:sum(FinalList) / length(FinalList);
 		false -> 0.5 end;
 
 handle_async_call(fe, #state{store=Store}) -> Store:zero(), ok;
@@ -186,6 +190,7 @@ get_word_tree(Subject, #state{regexes={RE1}} = State) ->
 	WordList = case re:run(Subject, RE1, [global, {capture, all, list}]) of
 		nomatch -> [];
 		{match, Captured} -> lists:append(Captured) end,
+%	erlang:display(WordList),
 	WordList1 = lists:filter(fun(W) -> string:len(W) > 2 end, WordList),
 	WordList2 = lists:map(fun(W) -> normalize_word(W, State) end, WordList1),
 
@@ -232,9 +237,13 @@ rate_word(Store, WordHash) ->
 			%	true -> Rating end;
 		%true -> 0.4 end.
 		true -> drop end,
+	correct_rate(Rating, PWC, NWC).
+
+correct_rate(Rating, PWC, NWC) ->
 	% Correction on Pr(S|W)
 	% Define Strength = 3
 	TO = PWC + NWC,
+	%PS = PWC/TO,
 	case Rating of
 		drop -> drop;
 		R -> (3*0.5 + TO*R)/(3 + TO) end.
