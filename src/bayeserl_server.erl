@@ -96,10 +96,12 @@ handle_async_call({s, Subject}, #state{store=Store} = State) ->
 	%	false -> RatingList end,
 	case RLLength > 3 andalso WTLength > 3 andalso RLLength/WTLength > 0.15 of
 		true ->
-			SL = lists:sort(fun(A,B) -> 
-				( ( erlang:abs(A - 0.5) ) =< ( erlang:abs(B - 0.5) ) )
-				end, RatingList),
-			FinalList = lists:sublist(SL, RLLength - 19, 20),
+			FinalList = case RLLength > 20 of
+				true ->	SL = lists:sort(fun(A,B) -> 
+						( ( erlang:abs(A - 0.5) ) =< ( erlang:abs(B - 0.5) ) )
+						end, RatingList),
+					lists:sublist(SL, RLLength - 19, 20);
+				false -> RatingList end,
 
 %			FinalList = RatingList,
 %			erlang:display(FinalList),
